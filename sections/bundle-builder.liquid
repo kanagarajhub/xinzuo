@@ -64,7 +64,7 @@
     data-section-id="{{ section.id }}"
     data-min-items="{{ min_items }}"
     data-max-items="{{ max_items }}"
-    data-tiers='{{ tiers_json | strip_newlines }}'
+    data-tiers="{{ tiers_json | escape }}"
     style="
       --padding-block-start: {{ section.settings.padding_block_start | default: 60 }}px;
       --padding-block-end: {{ section.settings.padding_block_end | default: 120 }}px;

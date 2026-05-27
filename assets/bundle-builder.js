@@ -187,6 +187,21 @@ class BundleBuilderComponent extends Component {
     });
   }
 
+  handleThumbnailClick(productId) {
+    if (this.#selectedProductIds.has(productId)) {
+      this.#selectedProductIds.delete(productId);
+      
+      const cards = this.refs.cards || [];
+      const card = cards.find((c) => c.dataset.productId === productId);
+      if (card) {
+        card.classList.remove('bundle-card--selected');
+        card.setAttribute('aria-pressed', 'false');
+      }
+      
+      this.#updateUI();
+    }
+  }
+
   // --- Tab Scroll ---
 
   #initTabArrows() {
@@ -458,13 +473,31 @@ class BundleBuilderComponent extends Component {
       const data = this.#productData.get(productId);
       if (!data || !data.image) continue;
 
+      const wrapper = document.createElement('div');
+      wrapper.className = 'bundle-summary__thumb-wrapper';
+      wrapper.setAttribute('role', 'button');
+      wrapper.setAttribute('tabindex', '0');
+      wrapper.setAttribute('aria-label', `Remove ${data.title}`);
+      wrapper.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.handleThumbnailClick(productId);
+      });
+
       const img = document.createElement('img');
       img.src = data.image;
       img.alt = data.title;
       img.className = 'bundle-summary__thumb';
       img.width = 40;
       img.height = 40;
-      strip.appendChild(img);
+      wrapper.appendChild(img);
+
+      const removeBadge = document.createElement('div');
+      removeBadge.className = 'bundle-summary__thumb-remove';
+      removeBadge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+      wrapper.appendChild(removeBadge);
+
+      strip.appendChild(wrapper);
     }
   }
 
