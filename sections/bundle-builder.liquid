@@ -189,14 +189,30 @@
                     data-available="{{ product.available }}"
                     data-title="{{ product.title | escape }}"
                     data-image="{{ product.featured_image | image_url: width: 100 }}"
+                    data-modal-image="{{ product.featured_image | image_url: width: 600 }}"
                     data-series="{{ product_series }}"
                     on:click="/handleCardClick"
                   >
+                    {%- comment -%} Info trigger button {%- endcomment -%}
+                    <button
+                      class="bundle-card__info-trigger"
+                      on:click="/handleInfoClick"
+                      aria-label="View details of {{ product.title | escape }}"
+                      type="button"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    </button>
+
                     {%- comment -%} Checkbox Overlay {%- endcomment -%}
                     <div class="bundle-card__checkbox">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <polyline points="20 6 9 17 4 12"></polyline>
                       </svg>
+                    </div>
+
+                    {%- comment -%} Product Description (hidden) {%- endcomment -%}
+                    <div class="bundle-card__description-content" style="display: none;">
+                      {{ product.description }}
                     </div>
 
                     {%- comment -%} Product Image {%- endcomment -%}
@@ -309,6 +325,45 @@
         </div>
       </div>
     </div>
+
+    {%- comment -%} Native Dialog Quick View Modal {%- endcomment -%}
+    <dialog class="bundle-dialog" ref="infoModal" aria-modal="true">
+      <div class="bundle-dialog__inner">
+        <button
+          class="bundle-dialog__close"
+          ref="modalCloseBtn"
+          on:click="/closeModal"
+          aria-label="Close details"
+          type="button"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="bundle-dialog__content">
+          <div class="bundle-dialog__media">
+            <img src="" alt="" ref="modalImage" width="500" height="500" loading="lazy">
+          </div>
+          <div class="bundle-dialog__details">
+            <h2 class="bundle-dialog__title" ref="modalTitle"></h2>
+            <div class="bundle-dialog__price-row">
+              <span class="bundle-dialog__price" ref="modalPrice"></span>
+              <s class="bundle-dialog__compare-price" ref="modalComparePrice"></s>
+            </div>
+            <div class="bundle-dialog__description rte" ref="modalDescription"></div>
+            <button
+              class="bundle-dialog__action-btn"
+              ref="modalActionBtn"
+              on:click="/handleModalAction"
+              type="button"
+            >
+              Add to Bundle
+            </button>
+          </div>
+        </div>
+      </div>
+    </dialog>
   </bundle-builder-component>
 </section>
 

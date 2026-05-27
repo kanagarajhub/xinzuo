@@ -235,12 +235,12 @@ bundle-builder-component {
 
 /* Selected State */
 .bundle-card--selected {
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15), 0 4px 20px rgba(0, 0, 0, 0.3);
+  border-color: var(--xinzuo-accent, #FFD380);
+  box-shadow: 0 0 15px rgba(255, 211, 128, 0.25), 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .bundle-card--selected:hover {
-  border-color: rgba(255, 255, 255, 0.45);
+  border-color: var(--xinzuo-accent-hover, #FFDC99);
   transform: translateY(-2px);
 }
 
@@ -315,15 +315,48 @@ bundle-builder-component {
 .bundle-card__badge {
   position: absolute;
   background-color: var(--xinzuo-red, #C81E1E);
-  padding: 5px 15px;
-  border-radius: 20px;
-  top: 10px;
-  left: 15px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  bottom: 10px;
+  left: 10px;
   font-family: "Sen", sans-serif;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 11px;
   color: #fff;
   z-index: 1;
+  letter-spacing: 0.05em;
+}
+
+.bundle-card__info-trigger {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.bundle-card__info-trigger:hover {
+  background: #fff;
+  border-color: #fff;
+  color: #000;
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.bundle-card__info-trigger svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* ============================================
@@ -366,6 +399,10 @@ bundle-builder-component {
   text-decoration: line-through;
   color: #828282;
 }
+
+/* ============================================
+   Summary Bar (Sticky Bottom)
+   ============================================ */
 
 .bundle-summary {
   position: fixed;
@@ -901,4 +938,184 @@ bundle-builder-component {
     width: 12px;
     height: 12px;
   }
+}
+
+/* ============================================
+   Quick View Modal (Bundle Dialog)
+   ============================================ */
+
+.bundle-dialog {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #111;
+  border-radius: 12px;
+  color: #fff;
+  max-width: 800px;
+  width: calc(100% - 32px);
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}
+
+.bundle-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+}
+
+.bundle-dialog[open] {
+  animation: bundleModalZoom 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes bundleModalZoom {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.bundle-dialog__inner {
+  position: relative;
+  padding: 32px;
+}
+
+.bundle-dialog__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.bundle-dialog__close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.bundle-dialog__content {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 32px;
+  align-items: start;
+}
+
+@media screen and (max-width: 750px) {
+  .bundle-dialog__content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .bundle-dialog__inner {
+    padding: 24px 16px 16px;
+  }
+  .bundle-dialog {
+    margin: auto 16px;
+  }
+}
+
+.bundle-dialog__media {
+  aspect-ratio: 1 / 1;
+  background: #1a1a1a;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.bundle-dialog__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bundle-dialog__details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 450px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.bundle-dialog__details::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bundle-dialog__details::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.bundle-dialog__title {
+  font-family: "Sen", sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.bundle-dialog__price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.bundle-dialog__price {
+  font-family: "Sen", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--xinzuo-accent, #FFD380);
+}
+
+.bundle-dialog__compare-price {
+  font-size: 16px;
+  text-decoration: line-through;
+  color: #828282;
+}
+
+.bundle-dialog__description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #c9c9cc;
+}
+
+.bundle-dialog__action-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--xinzuo-accent, #FFD380);
+  color: var(--xinzuo-accent-text, #000000);
+  border: none;
+  border-radius: 4px;
+  font-family: "Sen", sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bundle-dialog__action-btn:hover {
+  background: var(--xinzuo-accent-hover, #FFDC99);
+  transform: translateY(-1px);
+}
+
+.bundle-dialog__action-btn--selected {
+  background: #22C55E;
+  color: #fff;
+}
+
+.bundle-dialog__action-btn--selected:hover {
+  background: #1eaf53;
 }

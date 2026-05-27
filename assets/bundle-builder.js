@@ -18,12 +18,24 @@ class BundleBuilderComponent extends Component {
   /** @type {string} Currently active series filter handle ('all' = show all) */
   #activeTab = 'all';
 
+  /** @type {string|null} Current product ID shown in quick-view modal */
+  #modalProductId = null;
+
   connectedCallback() {
     super.connectedCallback();
     this.#parseConfig();
     this.#parseProductData();
     this.#updateUI();
     this.#initTabArrows();
+    this.#initModalEvents();
+  }
+
+  #initModalEvents() {
+    if (this.refs.infoModal) {
+      this.refs.infoModal.addEventListener('close', () => {
+        this.#modalProductId = null;
+      });
+    }
   }
 
   // --- Configuration ---
@@ -88,6 +100,112 @@ class BundleBuilderComponent extends Component {
     });
 
     this.#updateUI();
+  }
+
+  handleInfoClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const trigger = event.target.closest('.bundle-card__info-trigger');
+    if (!trigger) return;
+
+    const card = trigger.closest('.bundle-card');
+    if (!card) return;
+
+    const productId = card.dataset.productId;
+    this.#modalProductId = productId;
+
+    const title = card.dataset.title;
+    const modalImage = card.dataset.modalImage || card.dataset.image;
+    const priceCents = parseInt(card.dataset.price) || 0;
+    const comparePriceCents = parseInt(card.dataset.comparePrice) || 0;
+    const descContent = card.querySelector('.bundle-card__description-content');
+    const description = descContent ? descContent.innerHTML : '';
+
+    // Update modal contents
+    if (this.refs.modalTitle) this.refs.modalTitle.textContent = title;
+    if (this.refs.modalImage) {
+      this.refs.modalImage.src = modalImage;
+      this.refs.modalImage.alt = title;
+    }
+    if (this.refs.modalPrice) this.refs.modalPrice.textContent = this.#formatMoney(priceCents);
+    if (this.refs.modalComparePrice) {
+      if (comparePriceCents > priceCents) {
+        this.refs.modalComparePrice.textContent = this.#formatMoney(comparePriceCents);
+        this.refs.modalComparePrice.style.display = '';
+      } else {
+        this.refs.modalComparePrice.style.display = 'none';
+      }
+    }
+    if (this.refs.modalDescription) this.refs.modalDescription.innerHTML = description;
+
+    // Action button state
+    this.#updateModalActionButton();
+
+    // Show modal
+    if (this.refs.infoModal) {
+      this.refs.infoModal.showModal();
+    }
+  }
+
+  closeModal() {
+    if (this.refs.infoModal) {
+      this.refs.infoModal.close();
+    }
+    this.#modalProductId = null;
+  }
+
+  handleModalAction() {
+    if (!this.#modalProductId) return;
+
+    const productId = this.#modalProductId;
+    const cards = this.refs.cards || [];
+    const card = cards.find((c) => c.dataset.productId === productId);
+
+    if (!card) return;
+
+    if (this.#selectedProductIds.has(productId)) {
+      this.#selectedProductIds.delete(productId);
+      card.classList.remove('bundle-card--selected');
+      card.setAttribute('aria-pressed', 'false');
+    } else {
+      if (this.#selectedProductIds.size >= this.#maxItems) {
+        this.#shakeButton();
+        this.closeModal();
+        return;
+      }
+      this.#selectedProductIds.add(productId);
+      card.classList.add('bundle-card--selected');
+      card.setAttribute('aria-pressed', 'true');
+    }
+
+    this.#updateUI();
+    this.closeModal();
+  }
+
+  #updateModalActionButton() {
+    if (!this.refs.modalActionBtn || !this.#modalProductId) return;
+
+    const isSelected = this.#selectedProductIds.has(this.#modalProductId);
+    this.refs.modalActionBtn.textContent = isSelected ? 'Remove from Bundle' : 'Add to Bundle';
+    
+    // Toggle styled class
+    this.refs.modalActionBtn.classList.toggle('bundle-dialog__action-btn--selected', isSelected);
+  }
+
+  handleThumbnailClick(productId) {
+    if (this.#selectedProductIds.has(productId)) {
+      this.#selectedProductIds.delete(productId);
+      
+      const cards = this.refs.cards || [];
+      const card = cards.find((c) => c.dataset.productId === productId);
+      if (card) {
+        card.classList.remove('bundle-card--selected');
+        card.setAttribute('aria-pressed', 'false');
+      }
+      
+      this.#updateUI();
+    }
   }
 
   async handleAddToCart() {
@@ -185,21 +303,6 @@ class BundleBuilderComponent extends Component {
       left: direction === 'left' ? -scrollAmount : scrollAmount,
       behavior: 'smooth',
     });
-  }
-
-  handleThumbnailClick(productId) {
-    if (this.#selectedProductIds.has(productId)) {
-      this.#selectedProductIds.delete(productId);
-      
-      const cards = this.refs.cards || [];
-      const card = cards.find((c) => c.dataset.productId === productId);
-      if (card) {
-        card.classList.remove('bundle-card--selected');
-        card.setAttribute('aria-pressed', 'false');
-      }
-      
-      this.#updateUI();
-    }
   }
 
   // --- Tab Scroll ---
